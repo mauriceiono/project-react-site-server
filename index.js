@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware for JSON data
 app.use(express.json());
 
-// Sample array of data (replace with your JSON data structure)
+// Sample array of data (replace with JSON data structure)
 const characters = [
     {
         id: "mario",
