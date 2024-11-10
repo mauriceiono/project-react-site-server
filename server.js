@@ -4,6 +4,8 @@ import bodyParser from 'body-parser';
 import fetch from 'node-fetch';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { join } from 'path';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +19,10 @@ app.use(cors());
 app.use(bodyParser.json());  // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
 
+// Serve images from the "images" directory
+app.use('/images', express.static(join(__dirname, 'images')));
+
+
 // Character data array
 const characters = [
     {
@@ -26,7 +32,7 @@ const characters = [
         description: "A plumber who goes on adventures to rescue Princess Peach.",
         abilities: "Superhuman agility, jumping, and power-ups like Fire Flower.",
         trivia: "His first appearance was in the 1981 arcade game Donkey Kong.",
-        image: "images/mario.jpg"
+        image: "https://project-react-site-server.onrender.com/api/characters/images/mario.jpg"
     },
     {
         id: "sonic",
