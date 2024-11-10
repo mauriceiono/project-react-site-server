@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 // Middleware setup
 app.use(cors());
 app.use(bodyParser.json());  // Parse JSON data from the frontend
-app.use(express.static('public')); // Serve static assets (like images)
+app.use(express.static(__dirname)); // Serve static assets 
 
 // Character data array
 const characters = [
