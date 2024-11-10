@@ -32,7 +32,7 @@ const characters = [
         description: "A plumber who goes on adventures to rescue Princess Peach.",
         abilities: "Superhuman agility, jumping, and power-ups like Fire Flower.",
         trivia: "His first appearance was in the 1981 arcade game Donkey Kong.",
-        image: "https://project-react-site-server.onrender.com/api/characters/images/mario.jpg"
+        image: "images/mario.jpg"
     },
     {
         id: "sonic",
