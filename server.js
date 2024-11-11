@@ -61,7 +61,7 @@ const characters = [
         description: "The king of the Koopas and a constant threat to Mario.",
         abilities: "Fire breathing, immense strength, and magical powers.",
         trivia: "Bowser has been the main antagonist in the Mario series since 1985.",
-        image: "images/bowser.jpg"
+        image: "/images/bowser.jpg"
     },
     {
         id: "eggman",
