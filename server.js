@@ -23,6 +23,7 @@ app.use(express.static(__dirname)); // Serve static assets
 app.use('/images', express.static(join(__dirname, 'images')));
 
 
+
 // Character data array
 const characters = [
     {
@@ -32,7 +33,7 @@ const characters = [
         description: "A plumber who goes on adventures to rescue Princess Peach.",
         abilities: "Superhuman agility, jumping, and power-ups like Fire Flower.",
         trivia: "His first appearance was in the 1981 arcade game Donkey Kong.",
-        image: "images/mario.jpg"
+        image: "/images/mario.jpg"
     },
     {
         id: "sonic",
@@ -41,7 +42,8 @@ const characters = [
         description: "A speedy blue hedgehog on a quest to stop Dr. Robotnik.",
         abilities: "Super speed, agility, and spin attacks.",
         trivia: "Sonic’s original design was based on a mix of a hedgehog and an armadillo.",
-        image: "images/sonic.jpg"
+        image: "/images/sonic.jpg"
+
     },
     {
         id: "link",
@@ -50,7 +52,7 @@ const characters = [
         description: "A hero tasked with rescuing Princess Zelda and defeating Ganon.",
         abilities: "Mastery of various weapons, puzzle-solving, and magic.",
         trivia: "Link is often mistaken for Zelda, but he is the hero of the series.",
-        image: "images/link.jpg"
+        image: "/images/link.jpg"
     },
     {
         id: "bowser",
@@ -68,7 +70,7 @@ const characters = [
         description: "A genius inventor and the main antagonist in the Sonic series.",
         abilities: "Mastery of robotics and engineering, along with intelligence.",
         trivia: "Eggman’s real name is Dr. Ivo Robotnik.",
-        image: "images/eggman.jpg"
+        image: "/images/eggman.jpg"
     },
     {
         id: "ganondorf",
@@ -77,7 +79,7 @@ const characters = [
         description: "The primary antagonist of the series, seeking power through the Triforce.",
         abilities: "Dark magic and combat skills.",
         trivia: "Ganondorf is the Gerudo king and the human form of Ganon.",
-        image: "images/ganondorf.jpg"
+        image: "/images/ganondorf.jpg"
     },
     {
         id: "luigi",
@@ -86,7 +88,7 @@ const characters = [
         description: "Mario's younger brother, known for his green outfit.",
         abilities: "Similar to Mario but with a unique jump and abilities.",
         trivia: "Luigi first appeared in 1983 in the arcade game Mario Bros.",
-        image: "images/luigi.jpg"
+        image: "/images/luigi.jpg"
     },
     {
         id: "tails",
@@ -95,7 +97,7 @@ const characters = [
         description: "Sonic’s sidekick with twin tails that allow him to fly.",
         abilities: "Flight and mechanical skills.",
         trivia: "Tails was first introduced in Sonic the Hedgehog 2 in 1992.",
-        image: "images/tails.jpg"
+        image: "/images/tails.jpg"
     },
     {
         id: "fi",
@@ -104,7 +106,7 @@ const characters = [
         description: "The spirit of the Master Sword, aiding Link in his journey.",
         abilities: "Can analyze enemies and give Link information.",
         trivia: "Fi has a calm and emotionless demeanor, unlike many characters.",
-        image: "images/fi zelda.jpg"
+        image: "/images/fi zelda.jpg"
     }
     // Add other characters similarly
 ];
@@ -122,6 +124,14 @@ app.get('/api/characters/:id', (req, res) => {
     } else {
         res.status(404).json({ message: 'Character not found' });
     }
+});
+
+// Endpoint to get all character images
+app.get('/api/images', (req, res) => {
+    // Extract all image URLs from the characters array
+    console.log("Request received at /api/characters/images");
+    const images = characters.map(char => char.image);
+    res.json(images);
 });
 
 // POST route to handle form submissions
