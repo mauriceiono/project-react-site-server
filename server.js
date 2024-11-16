@@ -124,11 +124,49 @@ app.get('/api/characters', async (req, res) => {
         }
         // Add other hardcoded characters similarly
     ];
-
     // Return only the hardcoded characters
     res.json(hardcodedCharacters);
 });
+// Endpoint to get all character images
+app.get('/api/images', async (req, res) => {
+    // Hardcoded character data
+    const hardcodedCharacters = [
+        {
+            image: "/images/mario.jpg"
+        },
+        {
+            image: "/images/sonic.jpg"
+        },
+        {
+            image: "/images/link.jpg"
+        },
+        {
+            image: "/images/bowser.jpg"
+        },
+        {
+            image: "/images/eggman.jpg"
+        },
+        {
+            image: "/images/ganondorf.jpg"
+        },
+        {
+            image: "/images/luigi.jpg"
+        },
+        {
+            image: "/images/tails.jpg"
+        },
+        {
+            image: "/images/fi zelda.jpg"
+        }
+    ];
 
+    // Extract all image URLs from the hardcoded characters array
+    console.log("Request received at /api/characters/api/images");
+    const images = hardcodedCharacters.map(char => char.image);
+
+    // Send the images as a response
+    res.json(images);
+});
 
 // 2. **MongoDB Characters Endpoint (GET)** - Only MongoDB characters
 app.get('/api/addedcharacters', async (req, res) => {
@@ -190,6 +228,7 @@ app.get('/api/addedcharacters/:id', async (req, res) => {
         res.status(500).json({ message: 'Error fetching character', error: err.message });
     }
 });
+
 
 // POST route to handle form submissions
 app.post('/send', async (req, res) => {
