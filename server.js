@@ -37,7 +37,7 @@ const characterSchema = new mongoose.Schema({
 // Create the Character model
 const Character = mongoose.model('Character', characterSchema);
 
-// 1. **Hardcoded Characters Endpoint** - Only hardcoded characters
+// Hardcoded Characters Endpoint
 app.get('/api/characters', async (req, res) => {
     // Hardcoded character data
     const hardcodedCharacters = [
@@ -125,8 +125,14 @@ app.get('/api/characters', async (req, res) => {
         // Add other hardcoded characters similarly
     ];
 
-    // Return only the hardcoded characters
-    res.json(hardcodedCharacters);
+   // Find the character by ID
+   const character = hardcodedCharacters.find(c => c.id === req.params.id);
+
+   if (character) {
+       res.json(character);
+   } else {
+       res.status(404).json({ message: 'Character not found' });
+   }
 });
 
 // 2. **MongoDB Characters Endpoint (GET)** - Only MongoDB characters
