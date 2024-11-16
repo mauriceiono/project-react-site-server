@@ -125,15 +125,10 @@ app.get('/api/characters', async (req, res) => {
         // Add other hardcoded characters similarly
     ];
 
-   // Find the character by ID
-   const character = hardcodedCharacters.find(c => c.id === req.params.id);
-
-   if (character) {
-       res.json(character);
-   } else {
-       res.status(404).json({ message: 'Character not found' });
-   }
+    // Return only the hardcoded characters
+    res.json(hardcodedCharacters);
 });
+
 
 // 2. **MongoDB Characters Endpoint (GET)** - Only MongoDB characters
 app.get('/api/addedcharacters', async (req, res) => {
