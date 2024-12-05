@@ -234,10 +234,11 @@ app.get('/api/CharacterList', async (req, res) => {
     ];
     res.json(characterList);
 });
+
 // New endpoint to get characters from CharacterList collection in MongoDB
 app.get('/api/CharacterList', async (req, res) => {
     try {
-        const characters = await CharacterList.find();
+        const characters = await Character.find();
         if (characters.length === 0) {
             return res.status(404).json({ message: 'No characters found in the database' });
         }
@@ -248,8 +249,9 @@ app.get('/api/CharacterList', async (req, res) => {
 });
 
 // Add New Character to CharacterList in MongoDB (POST)
-app.post('/api/CharacterList', async (req, res) => {
-    const { name, description, image } = req.body;
+app.post('/api/CharacterList', upload.single('image'), async (req, res) => {
+    const { name, description } = req.body;
+    const image = req.file ? req.file.buffer.toString('base64') : null;
 
     // Validate incoming data
     const schema = Joi.object({
@@ -268,7 +270,7 @@ app.post('/api/CharacterList', async (req, res) => {
         const id = uuidv4();
 
         // Add the new character to MongoDB
-        const newCharacter = new CharacterList({ id, name, description, image });
+        const newCharacter = new Character({ id, name, description, image });
         const savedCharacter = await newCharacter.save();
 
         res.status(201).json({ message: 'Character added successfully!', character: savedCharacter });
@@ -280,7 +282,7 @@ app.post('/api/CharacterList', async (req, res) => {
 // Endpoint to get a character by ID from CharacterList in MongoDB
 app.get('/api/CharacterList/:id', async (req, res) => {
     try {
-        const character = await CharacterList.findOne({ id: req.params.id });
+        const character = await Character.findOne({ id: req.params.id });
         if (character) {
             res.json(character);
         } else {
@@ -292,9 +294,10 @@ app.get('/api/CharacterList/:id', async (req, res) => {
 });
 
 // Edit an existing character by ID in CharacterList (PUT)
-app.put('/api/CharacterList/:id', async (req, res) => {
+app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
-    const { name, description, image } = req.body;
+    const { name, description } = req.body;
+    const image = req.file ? req.file.buffer.toString('base64') : null;
 
     // Validate incoming data
     const schema = Joi.object({
@@ -309,7 +312,7 @@ app.put('/api/CharacterList/:id', async (req, res) => {
     }
 
     try {
-        const updatedCharacter = await CharacterList.findOneAndUpdate(
+        const updatedCharacter = await Character.findOneAndUpdate(
             { id },
             { name, description, image },
             { new: true } // Return the updated document
@@ -330,7 +333,7 @@ app.delete('/api/CharacterList/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const deletedCharacter = await CharacterList.findOneAndDelete({ id });
+        const deletedCharacter = await Character.findOneAndDelete({ id });
         if (!deletedCharacter) {
             return res.status(404).json({ message: 'Character not found' });
         }
@@ -340,16 +343,7 @@ app.delete('/api/CharacterList/:id', async (req, res) => {
         res.status(500).json({ message: 'Error deleting character', error: err.message });
     }
 });
-// Define CharacterList Schema
-const characterListSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    image: { type: String, required: true }
-});
 
-// Create the CharacterList model
-const CharacterList = mongoose.model('CharacterList', characterListSchema);
 // POST route to handle form submissions
 app.post('/send', async (req, res) => {
     const { name, email, message } = req.body;
@@ -359,6 +353,7 @@ app.post('/send', async (req, res) => {
         message,
         access_key: '1a115c8c-ffcc-41cf-973b-be26c8c56204'  // Web3Forms API key
     });
+
     try {
         const response = await fetch('https://api.web3forms.com/submit', {
             method: 'POST',
@@ -368,6 +363,7 @@ app.post('/send', async (req, res) => {
             },
             body: json,
         });
+
         if (response.ok) {
             res.json({ status: 'success', message: 'Email sent successfully!' });
         } else {
@@ -377,6 +373,7 @@ app.post('/send', async (req, res) => {
         res.json({ status: 'error', message: 'Error sending email.' });
     }
 });
+
 // Serve the index.html for documentation or testing
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
