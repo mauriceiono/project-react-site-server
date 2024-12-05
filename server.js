@@ -228,6 +228,126 @@ app.get('/api/CharacterList', async (req, res) => {
     ];
     res.json(characterList);
 });
+// New endpoint to get characters from CharacterList collection in MongoDB
+app.get('/api/CharacterList', async (req, res) => {
+    try {
+        const characters = await CharacterList.find();
+        if (characters.length === 0) {
+            return res.status(404).json({ message: 'No characters found in the database' });
+        }
+        res.json(characters);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching characters from MongoDB', error: err.message });
+    }
+});
+
+// Add New Character to CharacterList in MongoDB (POST)
+app.post('/api/CharacterList', async (req, res) => {
+    const { id, name, description, image } = req.body;
+
+    // Validate incoming data
+    const schema = Joi.object({
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+        description: Joi.string().required(),
+        image: Joi.string().required()
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+    }
+
+    try {
+        // Check for duplicate IDs in MongoDB
+        const existingCharacter = await CharacterList.findOne({ id });
+        if (existingCharacter) {
+            return res.status(409).json({ message: 'Character with this ID already exists.' });
+        }
+
+        // Add the new character to MongoDB
+        const newCharacter = new CharacterList({ id, name, description, image });
+        const savedCharacter = await newCharacter.save();
+
+        res.status(201).json({ message: 'Character added successfully!', character: savedCharacter });
+    } catch (err) {
+        res.status(500).json({ message: 'Error adding character to MongoDB', error: err.message });
+    }
+});
+
+// Endpoint to get a character by ID from CharacterList in MongoDB
+app.get('/api/CharacterList/:id', async (req, res) => {
+    try {
+        const character = await CharacterList.findOne({ id: req.params.id });
+        if (character) {
+            res.json(character);
+        } else {
+            res.status(404).json({ message: 'Character not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching character', error: err.message });
+    }
+});
+
+// Edit an existing character by ID in CharacterList (PUT)
+app.put('/api/CharacterList/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, description, image } = req.body;
+
+    // Validate incoming data
+    const schema = Joi.object({
+        name: Joi.string().required(),
+        description: Joi.string().required(),
+        image: Joi.string().required()
+    });
+
+    const { error } = schema.validate({ name, description, image });
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+    }
+
+    try {
+        const updatedCharacter = await CharacterList.findOneAndUpdate(
+            { id },
+            { name, description, image },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedCharacter) {
+            return res.status(404).json({ message: 'Character not found' });
+        }
+
+        res.status(200).json({ message: 'Character updated successfully!', character: updatedCharacter });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating character', error: err.message });
+    }
+});
+
+// Delete a character by ID from CharacterList (DELETE)
+app.delete('/api/CharacterList/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedCharacter = await CharacterList.findOneAndDelete({ id });
+        if (!deletedCharacter) {
+            return res.status(404).json({ message: 'Character not found' });
+        }
+
+        res.status(200).json({ message: 'Character deleted successfully!', character: deletedCharacter });
+    } catch (err) {
+        res.status(500).json({ message: 'Error deleting character', error: err.message });
+    }
+});
+// Define CharacterList Schema
+const characterListSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    image: { type: String, required: true }
+});
+
+// Create the CharacterList model
+const CharacterList = mongoose.model('CharacterList', characterListSchema);
 
 // 2. **MongoDB Characters Endpoint (GET)** - Only MongoDB characters
 app.get('/api/addedcharacters', async (req, res) => {
