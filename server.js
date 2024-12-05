@@ -22,10 +22,6 @@ app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
 
-// Set up multer for handling file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI || "mongodb+srv://mockit:superman123@cluster0.k5qvx.mongodb.net/testdb?retryWrites=true&w=majority")
@@ -248,9 +244,8 @@ app.get('/api/CharacterList', async (req, res) => {
 });
 
 // Add New Character to CharacterList in MongoDB (POST)
-app.post('/api/CharacterList', upload.single('image'), async (req, res) => {
-    const { name, description } = req.body;
-    const image = req.file ? req.file.buffer.toString('base64') : null;
+app.post('/api/CharacterList', async (req, res) => {
+    const { name, description, image } = req.body;
 
     // Validate incoming data
     const schema = Joi.object({
@@ -293,10 +288,9 @@ app.get('/api/CharacterList/:id', async (req, res) => {
 });
 
 // Edit an existing character by ID in CharacterList (PUT)
-app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
+app.put('/api/CharacterList/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, description } = req.body;
-    const image = req.file ? req.file.buffer.toString('base64') : null;
+    const { name, description, image } = req.body;
 
     // Validate incoming data
     const schema = Joi.object({
@@ -352,7 +346,33 @@ const characterListSchema = new mongoose.Schema({
 
 // Create the CharacterList model
 const CharacterList = mongoose.model('CharacterList', characterListSchema);
-
+// POST route to handle form submissions
+app.post('/send', async (req, res) => {
+    const { name, email, message } = req.body;
+    const json = JSON.stringify({
+        name,
+        email,
+        message,
+        access_key: '1a115c8c-ffcc-41cf-973b-be26c8c56204'  // Web3Forms API key
+    });
+    try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: json,
+        });
+        if (response.ok) {
+            res.json({ status: 'success', message: 'Email sent successfully!' });
+        } else {
+            res.json({ status: 'error', message: 'Email could not be sent.' });
+        }
+    } catch (error) {
+        res.json({ status: 'error', message: 'Error sending email.' });
+    }
+});
 // Serve the index.html for documentation or testing
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
