@@ -22,6 +22,10 @@ app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
 
+// Set up multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI || "mongodb+srv://mockit:superman123@cluster0.k5qvx.mongodb.net/testdb?retryWrites=true&w=majority")
