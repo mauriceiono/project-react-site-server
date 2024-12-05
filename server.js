@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import Joi from "joi";
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid'; // Import UUID library
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -243,27 +244,23 @@ app.get('/api/CharacterList', async (req, res) => {
 
 // Add New Character to CharacterList in MongoDB (POST)
 app.post('/api/CharacterList', async (req, res) => {
-    const { id, name, description, image } = req.body;
+    const { name, description, image } = req.body;
 
     // Validate incoming data
     const schema = Joi.object({
-        id: Joi.string().required(),
         name: Joi.string().required(),
         description: Joi.string().required(),
         image: Joi.string().required()
     });
 
-    const { error } = schema.validate(req.body);
+    const { error } = schema.validate({ name, description, image });
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
 
     try {
-        // Check for duplicate IDs in MongoDB
-        const existingCharacter = await CharacterList.findOne({ id });
-        if (existingCharacter) {
-            return res.status(409).json({ message: 'Character with this ID already exists.' });
-        }
+        // Generate a unique ID
+        const id = uuidv4();
 
         // Add the new character to MongoDB
         const newCharacter = new CharacterList({ id, name, description, image });
@@ -348,148 +345,6 @@ const characterListSchema = new mongoose.Schema({
 
 // Create the CharacterList model
 const CharacterList = mongoose.model('CharacterList', characterListSchema);
-
-// 2. **MongoDB Characters Endpoint (GET)** - Only MongoDB characters
-app.get('/api/addedcharacters', async (req, res) => {
-    try {
-        const characters = await Character.find();
-        if (characters.length === 0) {
-            return res.status(404).json({ message: 'No characters found in the database' });
-        }
-        res.json(characters);
-    } catch (err) {
-        res.status(500).json({ message: 'Error fetching characters from MongoDB', error: err.message });
-    }
-});
-
-// 3. **Add New Character to MongoDB (POST)** - Add a new character to MongoDB
-app.post('/api/addedcharacters', async (req, res) => {
-    const { id, name, description, image } = req.body;
-
-    // Validate incoming data
-    const schema = Joi.object({
-        id: Joi.string().required(),
-        name: Joi.string().required(),
-        description: Joi.string().required(),
-        image: Joi.string().required()
-    });
-
-    const { error } = schema.validate(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
-
-    try {
-        // Check for duplicate IDs in MongoDB
-        const existingCharacter = await Character.findOne({ id });
-        if (existingCharacter) {
-            return res.status(409).json({ message: 'Character with this ID already exists.' });
-        }
-
-        // Add the new character to MongoDB
-        const newCharacter = new Character({ id, name, description, image });
-        const savedCharacter = await newCharacter.save();
-
-        res.status(201).json({ message: 'Character added successfully!', character: savedCharacter });
-    } catch (err) {
-        res.status(500).json({ message: 'Error adding character to MongoDB', error: err.message });
-    }
-});
-
-// 4. **Endpoint to get a character by ID** - To retrieve a character by its ID from MongoDB
-app.get('/api/addedcharacters/:id', async (req, res) => {
-    try {
-        const character = await Character.findOne({ id: req.params.id });
-        if (character) {
-            res.json(character);
-        } else {
-            res.status(404).json({ message: 'Character not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ message: 'Error fetching character', error: err.message });
-    }
-});
-
-// Edit an existing character by ID (PUT)
-app.put('/api/addedcharacters/:id', async (req, res) => {
-    const { id } = req.params;
-    const { name, description, image } = req.body;
-
-    // Validate incoming data
-    const schema = Joi.object({
-        name: Joi.string().required(),
-        description: Joi.string().required(),
-        image: Joi.string().required()
-    });
-
-    const { error } = schema.validate({ name, description, image });
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
-
-    try {
-        const updatedCharacter = await Character.findOneAndUpdate(
-            { id },
-            { name, description, image },
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedCharacter) {
-            return res.status(404).json({ message: 'Character not found' });
-        }
-
-        res.status(200).json({ message: 'Character updated successfully!', character: updatedCharacter });
-    } catch (err) {
-        res.status(500).json({ message: 'Error updating character', error: err.message });
-    }
-});
-
-// Delete a character by ID (DELETE)
-app.delete('/api/addedcharacters/:id', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const deletedCharacter = await Character.findOneAndDelete({ id });
-        if (!deletedCharacter) {
-            return res.status(404).json({ message: 'Character not found' });
-        }
-
-        res.status(200).json({ message: 'Character deleted successfully!', character: deletedCharacter });
-    } catch (err) {
-        res.status(500).json({ message: 'Error deleting character', error: err.message });
-    }
-});
-
-// POST route to handle form submissions
-app.post('/send', async (req, res) => {
-    const { name, email, message } = req.body;
-
-    const json = JSON.stringify({
-        name,
-        email,
-        message,
-        access_key: process.env.WEB3FORMS_KEY || '1a115c8c-ffcc-41cf-973b-be26c8c56204'
-    });
-
-    try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: json,
-        });
-
-        if (response.ok) {
-            res.json({ status: 'success', message: 'Email sent successfully!' });
-        } else {
-            res.json({ status: 'error', message: 'Email could not be sent.' });
-        }
-    } catch (error) {
-        res.json({ status: 'error', message: 'Error sending email.' });
-    }
-});
 
 // Serve the index.html for documentation or testing
 app.get('/', (req, res) => {
