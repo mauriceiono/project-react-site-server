@@ -7,6 +7,7 @@ import { dirname, join } from 'path';
 import Joi from "joi";
 import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid'; // Import UUID library
+import multer from 'multer'; // Import multer
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,10 @@ app.use(cors());
 app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
+
+// Set up multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Connect to MongoDB
 mongoose
@@ -243,8 +248,9 @@ app.get('/api/CharacterList', async (req, res) => {
 });
 
 // Add New Character to CharacterList in MongoDB (POST)
-app.post('/api/CharacterList', async (req, res) => {
-    const { name, description, image } = req.body;
+app.post('/api/CharacterList', upload.single('image'), async (req, res) => {
+    const { name, description } = req.body;
+    const image = req.file ? req.file.buffer.toString('base64') : null;
 
     // Validate incoming data
     const schema = Joi.object({
@@ -287,9 +293,10 @@ app.get('/api/CharacterList/:id', async (req, res) => {
 });
 
 // Edit an existing character by ID in CharacterList (PUT)
-app.put('/api/CharacterList/:id', async (req, res) => {
+app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
-    const { name, description, image } = req.body;
+    const { name, description } = req.body;
+    const image = req.file ? req.file.buffer.toString('base64') : null;
 
     // Validate incoming data
     const schema = Joi.object({
