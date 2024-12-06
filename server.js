@@ -23,9 +23,15 @@ app.use(express.static(__dirname)); // Serve static assets
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
 
 // Set up multer for handling file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-//add multer to be able to load the images
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, join(__dirname, 'images'));
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`);
+    }
+  });
+  const upload = multer({ storage: storage })
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI || "mongodb+srv://mockit:superman123@cluster0.k5qvx.mongodb.net/testdb?retryWrites=true&w=majority")
@@ -136,7 +142,7 @@ app.get('/api/CharacterList', async (req, res) => {
 // Add New Character to CharacterList in MongoDB (POST)
 app.post('/api/CharacterList', upload.single('image'), async (req, res) => {
     const { name, description } = req.body;
-    const image = req.file ? req.file.buffer.toString('base64') : null;
+    const image = req.file ? `/images/${req.file.filename}` : req.body.image;
 
     // Validate incoming data
     const schema = Joi.object({
