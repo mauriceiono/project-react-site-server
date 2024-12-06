@@ -23,7 +23,6 @@ app.use(express.static(__dirname)); // Serve static assets
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
 
 // Set up multer for handling file uploads
-// Set up multer for handling file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, join(__dirname, 'images')); // Save images to the 'images' directory
@@ -188,7 +187,7 @@ app.get('/api/CharacterList/:id', async (req, res) => {
 app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
     const { name, description } = req.body;
-    const image = req.file ? `/images/${req.file.filename}` : req.body.image;
+    const image = req.file ? `images/${req.file.filename}` : req.body.image;
   
     // Validate incoming data
     const schema = Joi.object({
