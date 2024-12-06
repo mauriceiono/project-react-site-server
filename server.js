@@ -25,7 +25,7 @@ app.use('/images', express.static(join(__dirname, 'images'))); // Serve images d
 // Set up multer for handling file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, join(__dirname, 'images')); // Save images to the 'images' directory
+      cb(null, join(__dirname, './images')); // Save images to the 'images' directory
     },
     filename: (req, file, cb) => {
       cb(null, `${Date.now()}-${file.originalname}`);
