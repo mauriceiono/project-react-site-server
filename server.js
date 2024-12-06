@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Middleware setup
-app.use(cors());
+app.use(cors({ origin: 'https://project-react-site.onrender.com' })); // Allow requests from your frontend domain
 app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
 app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
