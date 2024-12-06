@@ -357,13 +357,22 @@ app.get('/api/images', async (req, res) => {
         }
     ];
 
-    // Extract all image URLs from the hardcoded characters array
-    console.log("Request received at /api/characters/api/images");
-    const images = hardcodedCharacters.map(char => char.image);
-
-    // Send the images as a response
-    res.json(images);
-});
+    try {
+        const characters = await Character.find({}, 'image'); // Fetch only the image field
+        const imagesFromDB = characters.map(char => char.image);
+    
+        // Extract all image URLs from the hardcoded characters array
+        const imagesFromHardcoded = hardcodedImages.map(char => char.image);
+    
+        // Combine both arrays
+        const allImages = [...imagesFromHardcoded, ...imagesFromDB];
+    
+        // Send the images as a response
+        res.json(allImages);
+      } catch (err) {
+        res.status(500).json({ message: 'Error fetching images', error: err.message });
+      }
+    });
 
 // POST route to handle form submissions
 app.post('/send', async (req, res) => {
