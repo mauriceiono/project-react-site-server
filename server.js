@@ -20,18 +20,18 @@ const __dirname = dirname(__filename);
 app.use(cors({ origin: 'https://project-react-site.onrender.com' })); // Allow requests from your frontend domain
 app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
-app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
+app.use('./images', express.static(join(__dirname, 'images'))); // Serve images directory
 
 // Set up multer for handling file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, join(__dirname, 'images'));
+      cb(null, join(__dirname, 'images')); // Save images to the 'images' directory
     },
     filename: (req, file, cb) => {
       cb(null, `${Date.now()}-${file.originalname}`);
     }
   });
-  const upload = multer({ storage: storage })
+  const upload = multer({ storage: storage });
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI || "mongodb+srv://mockit:superman123@cluster0.k5qvx.mongodb.net/testdb?retryWrites=true&w=majority")
@@ -187,7 +187,7 @@ app.get('/api/CharacterList/:id', async (req, res) => {
 app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
     const { name, description } = req.body;
-    const image = req.file ? req.file.buffer.toString('base64') : req.body.image;
+    const image = req.file ? `/images/${req.file.filename}` : req.body.image;
   
     // Validate incoming data
     const schema = Joi.object({
@@ -205,7 +205,7 @@ app.put('/api/CharacterList/:id', upload.single('image'), async (req, res) => {
       const updatedCharacter = await Character.findOneAndUpdate(
         { id },
         { name, description, image },
-        { new: true } // Return the updated document
+        { new: true }
       );
   
       if (!updatedCharacter) {
