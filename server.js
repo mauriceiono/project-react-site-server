@@ -142,7 +142,7 @@ app.get('/api/CharacterList', async (req, res) => {
 // Add New Character to CharacterList in MongoDB (POST)
 app.post('/api/CharacterList', upload.single('image'), async (req, res) => {
     const { name, description } = req.body;
-    const image = req.file ? `/images/${req.file.filename}` : req.body.image;
+    const image = req.file ? `images/${req.file.filename}` : req.body.image;
 
     // Validate incoming data
     const schema = Joi.object({
