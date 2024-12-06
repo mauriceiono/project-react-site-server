@@ -20,8 +20,9 @@ const __dirname = dirname(__filename);
 app.use(cors({ origin: 'https://project-react-site.onrender.com' })); // Allow requests from your frontend domain
 app.use(bodyParser.json()); // Parse JSON data from the frontend
 app.use(express.static(__dirname)); // Serve static assets 
-app.use('./images', express.static(join(__dirname, 'images'))); // Serve images directory
+app.use('/images', express.static(join(__dirname, 'images'))); // Serve images directory
 
+// Set up multer for handling file uploads
 // Set up multer for handling file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
